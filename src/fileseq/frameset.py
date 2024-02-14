@@ -4,6 +4,7 @@ frameset - A set-like object representing a frame range for fileseq.
 """
 from __future__ import absolute_import, division
 
+import itertools
 from builtins import str
 from builtins import map
 import future.utils as futils
@@ -227,6 +228,18 @@ class FrameSet(Set):
                 frames = xfrange(start, end, 1, maxSize=maxSize)
                 frames = (f for f in frames if f not in not_good)
                 frames = [f for f in frames if f not in items]
+                self._maxSizeCheck(len(frames) + len(items))
+                order.extend(frames)
+                items.update(frames)
+            elif modifier == 'd':
+                if (end - start + 1) < chunk or chunk < 2:
+                    raise ValueError(
+                        "Cannot distribute {} frames over the range {}-{}"
+                        "".format(chunk, start, end)
+                    )
+                step = (end - start) / (chunk - 1)
+                frames = itertools.islice(itertools.count(start, step), chunk)
+                frames = list(map(int, frames))
                 self._maxSizeCheck(len(frames) + len(items))
                 order.extend(frames)
                 items.update(frames)

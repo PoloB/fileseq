@@ -3,6 +3,8 @@
 from __future__ import division
 from __future__ import absolute_import
 
+import itertools
+
 from future import standard_library
 standard_library.install_aliases()
 from future.utils import string_types, text_type, native_str
@@ -52,6 +54,21 @@ def _srange(first, last=None, incr=1):
                 yield i
 
 
+def _drange(first, last, incr=1):
+    """
+    Simple value generator for the 1-20d5 syntax.
+    :param first: as per xrange
+    :param last: as per xrange
+    :param incr: as per xrange
+    :return: generator
+    """
+    incr = abs(incr)
+    step = (last - first) / (incr - 1)
+    whole = itertools.islice(itertools.count(first, step), incr)
+    for i in whole:
+        yield int(i)
+
+
 def _uchain(*args):
     """
     As per itertools.chain, but will only yield items not previously yielded.
@@ -96,6 +113,7 @@ FRAME_SET_SHOULD_SUCCEED = [
     ('UnicodeEquivalentRangeChunk', u'-1--20x5', list(range(-1,-21,-5))),
     ('UnicodeEquivalentRangeFill', u'-1--20y5', list(_yrange(-1,-21,-5))),
     ('UnicodeEquivalentRangeStagger', u'-1--20:5', list(_srange(-1,-21,-5))),
+    ('UnicodeEquivalentRangeDistributed', u'-1--20d5', list(_drange(-1,-21,-5))),
 ]
 
 LO_RANGES = [
@@ -132,7 +150,16 @@ LO_RANGES = [
     ('PosToPosStaggerInv', '20-1:5', list(_srange(20,0,-5))),
     ('NegToPosStaggerInv', '-20-1:5', list(_srange(-20,2,5))),
     ('NegToNegStaggerInv', '-20--1:5', list(_srange(-20,0,5))),
-    ('PosToNegStaggerInv', '20--1:5', list(_srange(20,-2,-5)))]
+    ('PosToNegStaggerInv', '20--1:5', list(_srange(20,-2,-5))),
+    ('PosToPosDistributed', '1-20:5', list(_drange(1,21,5))),
+    ('NegToPosDistributed', '-1-20:5', list(_drange(-1,21,5))),
+    ('NegToNegDistributed', '-1--20:5', list(_drange(-1,-21,-5))),
+    ('PosToNegDistributed', '1--20:5', list(_drange(1,-21,-5))),
+    ('PosToPosDistributedInv', '20-1:5', list(_drange(20,0,-5))),
+    ('NegToPosDistributedInv', '-20-1:5', list(_drange(-20,2,5))),
+    ('NegToNegDistributedInv', '-20--1:5', list(_drange(-20,0,5))),
+    ('PosToNegDistributedInv', '20--1:5', list(_drange(20,-2,-5))),
+]
 
 HI_RANGES = [
     # high value permutations of signed integer ranges, these will be permuted with the LO_RANGES for testing
@@ -167,7 +194,16 @@ HI_RANGES = [
     ('PosToPosStaggerInv', '30-21:5', list(_srange(30,20,-5))),
     ('NegToPosStaggerInv', '-30-21:5', list(_srange(-30,22,5))),
     ('NegToNegStaggerInv', '-30--21:5', list(_srange(-30,-20,5))),
-    ('PosToNegStaggerInv', '30--21:5', list(_srange(30,-22,-5)))]
+    ('PosToNegStaggerInv', '30--21:5', list(_srange(30,-22,-5))),
+    ('PosToPosDistributed', '21-30:5', list(_drange(21,31,5))),
+    ('NegToPosDistributed', '-21-30:5', list(_drange(-21,31,5))),
+    ('NegToNegDistributed', '-21--30:5', list(_drange(-21,-31,-5))),
+    ('PosToNegDistributed', '21--30:5', list(_drange(21,-31,-5))),
+    ('PosToPosDistributedInv', '30-21:5', list(_drange(30,20,-5))),
+    ('NegToPosDistributedInv', '-30-21:5', list(_drange(-30,22,5))),
+    ('NegToNegDistributedInv', '-30--21:5', list(_drange(-30,-20,5))),
+    ('PosToNegDistributedInv', '30--21:5', list(_drange(30,-22,-5))),
+]
 
 for lo in LO_RANGES:
     FRAME_SET_SHOULD_SUCCEED.append(lo)
@@ -184,6 +220,8 @@ FRAME_SET_SHOULD_FAIL = [
     ("NegWFillChar", "-1y5"),
     ("PosWStaggerChar", "1:5"),
     ("NegWStaggerChar", "-1:5"),
+    ("PosWDistributedChar", "1d5"),
+    ("NegWDistributedChar", "-1d5"),
     ("PosWSepChar", "1-"),
     ("NegWSepChar", "-1-"),
     ("BadAlphaChars", "bilbo"),
@@ -193,12 +231,16 @@ FRAME_SET_SHOULD_FAIL = [
     ("RangeWChunkZero", "1-20x0"),
     ("RangeWFillZero", "1-20y0"),
     ("RangeWStaggerZero", "1-20:0"),
+    ("RangeWDistributedZero", "1-20d0"),
     ("RangeWNegChunk", "1-20x-5"),
     ("RangeWNegFill", "1-20y-5"),
     ("RangeWNegStagger", "1-20:-5"),
+    ("RangeWNegDistributed", "1-20d-5"),
     ("NonNumericChar", "a"),
     ("NonNumericRange", "a-z"),
     ("NonNumericSeq", ["a", "z"]),
+    ("RangeWDistributedBelowTwo", "1-5d1"),
+    ("RangeWDistributedBelowTwoSingle", "1-1d1"),
     ("ActualNone", None),
 ]
 

@@ -190,7 +190,7 @@ FRANGE_PATTERN = r"""
         -                     #   range delimiter
         (-?\d+(?:\.\d+)?)     #   end frame
         (?:                   #   optional stepping
-            ([:xy])           #     step format
+            ([:xyd])          #     step format
             (-?\d+(?:\.\d+)?) #     step value
         )?
     )?
